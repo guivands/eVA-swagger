@@ -8,6 +8,16 @@
     "schemes": [
         "http"
     ],
+	"tags": [  
+      {  
+         "name":"conversation",
+         "description":"Audio and Text conversations for eVA",
+         "externalDocs":{  
+            "description":"See the docs",
+            "url":"http://quark.everis.int/confluence/display/EVIRTUALAT/Bienvenido+al+portal+de+Proyecto"
+         }
+      }
+	]
     "definitions": {
         "Audio": {
             "description": "Audio to be transfered. Can be either the server sending the audio to be played to the user; or the user recorded audio sent to the server",
