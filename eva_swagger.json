@@ -5,6 +5,9 @@
         "title": "eVA API",
         "description": "eVA - everis Virtual Assistant"
     },
+    "schemes": [
+        "http"
+    ],
     "definitions": {
         "Audio": {
             "description": "Audio to be transfered. Can be either the server sending the audio to be played to the user; or the user recorded audio sent to the server",
@@ -208,6 +211,9 @@
     "paths": {
         "/conversations": {
             "post": {
+                "tags": [
+                    "conversation"
+                ],
                 "description": "Start a conversation with the Virtual Assistant\n",
                 "parameters": [
                     {
@@ -328,6 +334,9 @@
         },
         "/conversations/{sessionCode}": {
             "get": {
+                "tags": [
+                    "conversation"
+                ],
                 "description": "Return the conversation session status",
                 "parameters": [
                     {
@@ -373,6 +382,9 @@
                 }
             },
             "post": {
+                "tags": [
+                    "conversation"
+                ],
                 "description": "Continue a conversation with the given session code",
                 "parameters": [
                     {
@@ -500,6 +512,9 @@
         },
         "/conversations/{sessionCode}/satisfactions": {
             "post": {
+                "tags": [
+                    "conversation"
+                ],
                 "description": "Satisfaction Survey API",
                 "parameters": [
                     {
