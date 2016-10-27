@@ -8,16 +8,16 @@
     "schemes": [
         "http"
     ],
-	"tags": [  
-      {  
-         "name":"conversation",
-         "description":"Audio and Text conversations for eVA",
-         "externalDocs":{  
-            "description":"See the docs",
-            "url":"http://quark.everis.int/confluence/display/EVIRTUALAT/Bienvenido+al+portal+de+Proyecto"
-         }
-      }
-	],
+    "tags": [
+        {
+            "name": "conversation",
+            "description": "Audio and Text conversations for eVA",
+            "externalDocs": {
+                "description": "See the docs",
+                "url": "http://quark.everis.int/confluence/display/EVIRTUALAT"
+            }
+        }
+    ],
     "definitions": {
         "Audio": {
             "description": "Audio to be transfered. Can be either the server sending the audio to be played to the user; or the user recorded audio sent to the server",
@@ -224,6 +224,7 @@
                 "tags": [
                     "conversation"
                 ],
+                "operationId": "startConversation",
                 "description": "Start a conversation with the Virtual Assistant\n",
                 "parameters": [
                     {
@@ -344,6 +345,7 @@
         },
         "/conversations/{sessionCode}": {
             "get": {
+                "operationId": "conversationStatus",
                 "tags": [
                     "conversation"
                 ],
@@ -395,6 +397,7 @@
                 "tags": [
                     "conversation"
                 ],
+                "operationId": "continueConversation",
                 "description": "Continue a conversation with the given session code",
                 "parameters": [
                     {
@@ -522,6 +525,7 @@
         },
         "/conversations/{sessionCode}/satisfactions": {
             "post": {
+                "operationId": "endConversation",
                 "tags": [
                     "conversation"
                 ],
