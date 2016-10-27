@@ -3,7 +3,7 @@
     "info": {
         "version": "1.0.0",
         "title": "eVA API",
-        "description": "eVA - everis Virtual Assistant"
+        "description": "eVA - everis Virtual Assistant\n\nCreate a smart robot for your virtual assistant with eVA. Integrate with your services\nand create a better user experience.\n"
     },
     "schemes": [
         "http"

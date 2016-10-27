@@ -3,7 +3,22 @@ swagger: '2.0'
 info:
   version: "1.0.0"
   title: eVA API
-  description: eVA - everis Virtual Assistant
+  description: |
+    eVA - everis Virtual Assistant
+    
+    Create a smart robot for your virtual assistant with eVA. Integrate with your services
+    and create a better user experience.
+  
+schemes:
+  - http
+
+tags:
+  -
+    name: conversation
+    description: Audio and Text conversations for eVA
+    externalDocs:
+        description: See the docs
+        url: http://quark.everis.int/confluence/display/EVIRTUALAT
 
 definitions:
   Audio:
@@ -156,6 +171,9 @@ definitions:
 paths:
   /conversations:
     post:
+      tags:
+        - conversation
+      operationId: startConversation
       description: |
         Start a conversation with the Virtual Assistant
       parameters:
@@ -249,6 +267,9 @@ paths:
   
   /conversations/{sessionCode}:
     get:
+      operationId: conversationStatus
+      tags:
+        - conversation
       description: Return the conversation session status
       parameters:
         -
@@ -283,6 +304,9 @@ paths:
             $ref: "#/definitions/ServiceError"
     
     post:
+      tags:
+        - conversation
+      operationId: continueConversation
       description: Continue a conversation with the given session code
       parameters:
         -
@@ -381,6 +405,9 @@ paths:
             
   /conversations/{sessionCode}/satisfactions:
     post: 
+      operationId: endConversation
+      tags:
+        - conversation
       description: Satisfaction Survey API
       parameters:
         -
