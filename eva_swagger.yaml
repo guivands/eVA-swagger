@@ -1,0 +1,426 @@
+swagger: '2.0'
+
+info:
+  version: "1.0.0"
+  title: eVA API
+  description: eVA - everis Virtual Assistant
+
+definitions:
+  Audio:
+    description: Audio to be transfered. Can be either the server sending the audio to be played to the user; or the user recorded audio sent to the server
+    required:
+      - content
+      - type
+    properties:
+      content:
+        type: string
+        description: Base 64 encoded audio
+      type:
+        type: string
+        description: Content-type of the audio. i.e. audio/wav, audio/l16
+      length:
+        type: number
+        format: int64
+        description: Length in bytes of the audio
+      sampleRate: 
+        type: number
+        format: int32
+        description: User's recorded audio sample rate
+  
+  ResponseEntity:
+    description: If one Intent has many options for the user to select from, these options will be listed as Entities
+    required:
+      - title
+      - text
+    properties:
+      title:
+        type: string
+        description: Title of the Entity
+      text:
+        type: string
+        description: Text to be displayed to the user
+        
+  ResponseIntent:
+    description: Intent resolved by the conversation tree as the most probable to be the answer to the user
+    required:
+      - title
+      - text
+    properties:
+      title:
+        type: string
+        description: Title of the Intent
+      text:
+        type: string
+        description: Text to be displayed to the user
+      audio:
+        $ref: "#/definitions/Audio"
+      entities:
+        type: array
+        items:
+          $ref: "#/definitions/ResponseEntity"
+          
+  ConversationRequest:
+    description: Request for the Conversation API
+    properties:
+      text:
+        type: string
+        description: User inputed text (audio = null)
+      audio:
+        $ref: "#/definitions/Audio"
+      returnAudio:
+        type: boolean
+        description: Whether to return audio or not
+  
+  ConversationResponse:
+    description: Response of the Conversation API
+    required:
+      - text
+      - sessionCode
+      - intent
+    properties:
+      text:
+        type: string
+        description: User inputed text or User interpreted Speech To Text transcript
+      sessionCode:
+        type: string
+        description: Broker's generated session code for a conversation
+      intent:
+        $ref: "#/definitions/ResponseIntent"
+        
+  ServiceSatisfaction:
+    description: Request of the Satisfaction Survey API
+    required:
+      - sessionCode
+      - answered
+      - evaluation
+    properties:
+      sessionCode:
+        type: string
+        description: Session code of the conversation beign evaluated
+      answered:
+        type: boolean
+        description: Whether the user's question was answered or not
+      evaluation:
+        type: number
+        enum: [1,2,3,4]
+        description: User's evaluation of the Virtual Assistante
+      userComments:
+        type: string
+        description: The user comments about the Virtual Assistant
+  
+  ConversationSession:
+    description: Response of the Conversation Get Session API
+    required:
+      - sessionCode
+      - createDate
+      - status
+      - expired
+    properties:
+      sessionCode:
+        type: string
+        description: Session code for the conversation
+      createDate:
+        type: string
+        format: date-time
+        description: Creation date
+      expireDate:
+        type: string
+        format: date-time
+        description: Date which this session expired
+      status:
+        type: string
+        enum: [CREATED,EXPIRED]
+        description: Status of the session
+      expired:
+        type: boolean
+        description: whether the conversation is expired or not
+  
+  ServiceError:
+    description: Error notation of the API
+    required:
+     - identificationCode
+     - exceptionName
+     - message
+    properties:
+      identificationCode:
+        type: string
+        description: Identification code for problem solving
+      exceptionName:
+        type: string
+        description: Name of the exception thrown by EVA API
+      message:
+        type: string
+        description: Error message
+      
+
+paths:
+  /conversations:
+    post:
+      description: |
+        Start a conversation with the Virtual Assistant
+      parameters:
+        -
+          name: API-KEY
+          in: header
+          type: string
+          description: API key
+          required: true
+        -
+          name: CHANNEL
+          in: header
+          type: string
+          description: Channel of communication
+          enum: [WEB, WEB_MOBILE, APP_MOBILE, SOCIAL_NETWORK]
+          required: true
+        -
+          name: SUBCHANNEL
+          in: header
+          type: string
+          description: Subchannel for the Channel. Is validate by the configuration of the Broker
+          required: true
+        -
+          name: OS
+          in: header
+          type: string
+          description: User's operating system
+          required: true
+        -
+          name: OS-VERSION
+          in: header
+          type: string
+          description: User's operating system version
+        -
+          name: BROWSER
+          in: header
+          type: string
+          description: User's browser
+        -
+          name: BROWSER-VERSION
+          in: header
+          type: string
+          description: APIUser's browser version
+        -
+          name: IP
+          in: header
+          type: string
+          description: User's IP address
+          required: true
+        -
+          name: BUSINESS-KEY
+          in: header
+          type: string
+          description: User's identification by the client application. Can be any form of ID or code.
+        -
+          name: LOCALE
+          in: header
+          type: string
+          description: Locale for internationalization (ie 'pt-BR')
+          required: true
+          
+        -
+          name: request
+          in: body
+          description: Conversation Request
+          required: true
+          schema:
+            $ref: "#/definitions/ConversationRequest"
+            
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/ConversationResponse"
+        204:
+          description: No transcript for Speech to Text
+          schema:
+            $ref: "#/definitions/ServiceError"
+        400:
+          description: Missing or invalid parameter in the request
+          schema:
+            $ref: "#/definitions/ServiceError"
+        403:
+          description: Missing or invalid API-KEY header
+          schema:
+            $ref: "#/definitions/ServiceError"
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ServiceError"
+  
+  /conversations/{sessionCode}:
+    get:
+      description: Return the conversation session status
+      parameters:
+        -
+          name: sessionCode
+          in: path
+          required: true
+          type: string
+          description: Conversation session code
+          
+        -
+          name: API-KEY
+          in: header
+          required: true
+          type: string
+          description: API key
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/ConversationSession"
+        403:
+          description: Forbidden access
+          schema:
+            $ref: "#/definitions/ServiceError"
+        404:
+          description: Conversation Session Not Found
+          schema:
+            $ref: "#/definitions/ServiceError"
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ServiceError"
+    
+    post:
+      description: Continue a conversation with the given session code
+      parameters:
+        -
+          name: sessionCode
+          in: path
+          required: true
+          type: string
+          description: Conversation session code
+        -
+          name: API-KEY
+          in: header
+          type: string
+          description: API key
+          required: true
+        -
+          name: CHANNEL
+          in: header
+          type: string
+          description: Channel of communication
+          enum: [WEB, WEB_MOBILE, APP_MOBILE, SOCIAL_NETWORK]
+          required: true
+        -
+          name: SUBCHANNEL
+          in: header
+          type: string
+          description: Subchannel for the Channel. Is validate by the configuration of the Broker
+          required: true
+        -
+          name: OS
+          in: header
+          type: string
+          description: User's operating system
+          required: true
+        -
+          name: OS-VERSION
+          in: header
+          type: string
+          description: User's operating system version
+        -
+          name: BROWSER
+          in: header
+          type: string
+          description: User's browser
+        -
+          name: BROWSER-VERSION
+          in: header
+          type: string
+          description: APIUser's browser version
+        -
+          name: IP
+          in: header
+          type: string
+          description: User's IP address
+          required: true
+        -
+          name: BUSINESS-KEY
+          in: header
+          type: string
+          description: User's identification by the client application. Can be any form of ID or code.
+        -
+          name: LOCALE
+          in: header
+          type: string
+          description: Locale for internationalization (ie 'pt-BR')
+          required: true
+          
+        -
+          name: request
+          in: body
+          description: Conversation Request
+          required: true
+          schema:
+            $ref: "#/definitions/ConversationRequest"
+            
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/ConversationResponse"
+        204:
+          description: No transcript for Speech to Text
+          schema:
+            $ref: "#/definitions/ServiceError"
+        400:
+          description: Missing or invalid parameter in the request
+          schema:
+            $ref: "#/definitions/ServiceError"
+        403:
+          description: Missing or invalid API-KEY header
+          schema:
+            $ref: "#/definitions/ServiceError"
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ServiceError"
+            
+  /conversations/{sessionCode}/satisfactions:
+    post: 
+      description: Satisfaction Survey API
+      parameters:
+        -
+          name: sessionCode
+          in: path
+          type: string
+          required: true
+        -
+          name: API-KEY
+          in: header
+          required: true
+          type: string
+          description: API key
+        -
+          name: LOCALE
+          in: header
+          required: true
+          type: string
+          description: Internationalization support (ie 'pt-BR')
+        -
+          name: request
+          in: body
+          description: Satisfaction Request
+          schema:
+            $ref: "#/definitions/ServiceSatisfaction"
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: string
+            description: Returns 'OK' on success
+        400:
+          description: Missing or invalid parameter in the request
+          schema:
+            $ref: "#/definitions/ServiceError"
+        403:
+          description: Missing or invalid API-KEY header
+          schema:
+            $ref: "#/definitions/ServiceError"
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ServiceError"
